@@ -10,4 +10,10 @@ DB_PORT = 5432
 ASSET_ID = 1
 VULN_ID = 1
 
+NON_EXISTENT_ID = 99999
+PER_PAGE_STANDARD = 50
+
+CVSS_MIN = 0.0
+CVSS_MAX = 10.0
+
 VALID_STATUSES = ["open", "confirmed", "in_progress", "resolved", "false_positive"]

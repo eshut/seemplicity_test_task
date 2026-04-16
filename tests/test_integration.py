@@ -2,7 +2,7 @@ import allure
 import requests
 from http import HTTPStatus
 
-from tests.constants import API, SCANNER_API, ASSET_ID, VULN_ID
+from tests.constants import API, SCANNER_API, ASSET_ID, VULN_ID, PER_PAGE_STANDARD
 
 
 class TestScannerToDashboard:
@@ -41,7 +41,7 @@ class TestScannerToDashboard:
             assert scan_resp.status_code == HTTPStatus.CREATED
 
         with allure.step("Find the newest finding in Dashboard API for this asset"):
-            findings_resp = requests.get(f"{API}/findings?per_page=50")
+            findings_resp = requests.get(f"{API}/findings?per_page={PER_PAGE_STANDARD}")
             assert findings_resp.status_code == HTTPStatus.OK
             matching = [
                 f for f in findings_resp.json()["items"]
@@ -167,12 +167,12 @@ class TestDuplicateScanHandling:
     )
     def test_asset_list_page1_includes_first_asset(self):
         with allure.step("GET first asset directly by ID"):
-            first_asset = requests.get(f"{SCANNER_API}/assets/1")
+            first_asset = requests.get(f"{SCANNER_API}/assets/{ASSET_ID}")
             assert first_asset.status_code == HTTPStatus.OK
             expected_id = first_asset.json()["id"]
 
-        with allure.step("GET /assets?page=1&per_page=50"):
-            page_resp = requests.get(f"{SCANNER_API}/assets?page=1&per_page=50")
+        with allure.step(f"GET /assets?page=1&per_page={PER_PAGE_STANDARD}"):
+            page_resp = requests.get(f"{SCANNER_API}/assets?page=1&per_page={PER_PAGE_STANDARD}")
             assert page_resp.status_code == HTTPStatus.OK
             items = page_resp.json()["items"]
             assert items, "No assets returned on page 1"

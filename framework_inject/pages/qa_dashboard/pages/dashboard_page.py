@@ -17,6 +17,7 @@ class DashboardPage(BasePage):
         self.filter_status = "#filter-status"
         self.findings_message = "#findings-message .message"
         self.status_selects = ".status-select"
+        self.first_row_status_badge = "#findings-table tr:has(.text-muted) td:nth-child(7) .status"
         self.assets_tbody = "#assets-table"
         self.assets_rows = "#assets-table tr"
 
@@ -36,21 +37,21 @@ class DashboardPage(BasePage):
 
     def filter_by_severity(self, severity):
         self.page.select_option(self.filter_severity, severity)
-        self.page.wait_for_timeout(800)
+        self.wait_for_element(self.findings_tbody)
 
     def filter_by_status(self, status):
         self.page.select_option(self.filter_status, status)
-        self.page.wait_for_timeout(800)
+        self.wait_for_element(self.findings_tbody)
 
     def reset_filters(self):
         self.page.select_option(self.filter_severity, "")
         self.page.select_option(self.filter_status, "")
-        self.page.wait_for_timeout(500)
+        self.wait_for_element(self.findings_tbody)
 
     def change_first_finding_status(self, status):
         selects = self.get_elements_list(self.status_selects)
         if not selects:
             return None
         selects[0].select_option(status)
-        self.page.wait_for_timeout(800)
+        self.wait_for_element(self.findings_message)
         return self.get_element_text(self.findings_message)

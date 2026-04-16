@@ -3,7 +3,7 @@ import pytest
 import requests
 from http import HTTPStatus
 
-from tests.constants import API, ASSET_ID, VULN_ID, VALID_STATUSES
+from tests.constants import API, ASSET_ID, VULN_ID, VALID_STATUSES, NON_EXISTENT_ID, PER_PAGE_STANDARD
 
 
 def _create(asset_id=ASSET_ID, vuln_id=VULN_ID, scanner="smoke"):
@@ -94,40 +94,40 @@ class TestErrorHandling:
     @allure.title("Create finding with non-existent asset_id — 400")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_nonexistent_asset(self):
-        with allure.step("POST /findings with asset_id=99999"):
-            resp = _create(asset_id=99999)
+        with allure.step(f"POST /findings with asset_id={NON_EXISTENT_ID}"):
+            resp = _create(asset_id=NON_EXISTENT_ID)
         with allure.step("Assert 400"):
             assert resp.status_code == HTTPStatus.BAD_REQUEST
 
     @allure.title("Create finding with non-existent vulnerability_id — 400")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_nonexistent_vulnerability(self):
-        with allure.step("POST /findings with vulnerability_id=99999"):
-            resp = _create(vuln_id=99999)
+        with allure.step(f"POST /findings with vulnerability_id={NON_EXISTENT_ID}"):
+            resp = _create(vuln_id=NON_EXISTENT_ID)
         with allure.step("Assert 400"):
             assert resp.status_code == HTTPStatus.BAD_REQUEST
 
     @allure.title("GET non-existent finding — 404")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_nonexistent_finding(self):
-        with allure.step("GET /findings/99999"):
-            resp = requests.get(f"{API}/findings/99999")
+        with allure.step(f"GET /findings/{NON_EXISTENT_ID}"):
+            resp = requests.get(f"{API}/findings/{NON_EXISTENT_ID}")
         with allure.step("Assert 404"):
             assert resp.status_code == HTTPStatus.NOT_FOUND
 
     @allure.title("PUT status on non-existent finding — 404")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_update_status_nonexistent_finding(self):
-        with allure.step("PUT /findings/99999/status"):
-            resp = requests.put(f"{API}/findings/99999/status", json={"status": "open"})
+        with allure.step(f"PUT /findings/{NON_EXISTENT_ID}/status"):
+            resp = requests.put(f"{API}/findings/{NON_EXISTENT_ID}/status", json={"status": "open"})
         with allure.step("Assert 404"):
             assert resp.status_code == HTTPStatus.NOT_FOUND
 
     @allure.title("DELETE non-existent finding — 404")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_dismiss_nonexistent_finding(self):
-        with allure.step("DELETE /findings/99999"):
-            resp = requests.delete(f"{API}/findings/99999")
+        with allure.step(f"DELETE /findings/{NON_EXISTENT_ID}"):
+            resp = requests.delete(f"{API}/findings/{NON_EXISTENT_ID}")
         with allure.step("Assert 404"):
             assert resp.status_code == HTTPStatus.NOT_FOUND
 
@@ -207,8 +207,8 @@ class TestEdgeCases:
     @allure.title("Filter status=open returns only open findings")
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_by_status_returns_only_matching(self):
-        with allure.step("GET /findings?status=open&per_page=50"):
-            resp = requests.get(f"{API}/findings?status=open&per_page=50")
+        with allure.step(f"GET /findings?status=open&per_page={PER_PAGE_STANDARD}"):
+            resp = requests.get(f"{API}/findings?status=open&per_page={PER_PAGE_STANDARD}")
         with allure.step("Assert every returned item has status=open"):
             assert resp.status_code == HTTPStatus.OK
             for item in resp.json()["items"]:

@@ -40,12 +40,9 @@ class TestDashboardSmoke:
     def test_status_change_reflected_in_table(self, dashboard: DashboardPage):
         with allure.step("Reset filters and wait for findings to render"):
             dashboard.reset_filters()
-            dashboard.page.wait_for_timeout(500)
 
         with allure.step("Read current status badge text of the first row"):
-            status_badge = dashboard.page.locator(
-                "#findings-table tr:has(.text-muted) td:nth-child(7) .status"
-            ).first
+            status_badge = dashboard.page.locator(dashboard.first_row_status_badge).first
             status_before = status_badge.inner_text().strip()
 
         with allure.step("Select 'In Progress' from the inline status dropdown"):

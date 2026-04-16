@@ -2,7 +2,7 @@ import allure
 import requests
 from http import HTTPStatus
 
-from tests.constants import API, ASSET_ID, VULN_ID
+from tests.constants import API, ASSET_ID, VULN_ID, CVSS_MIN, CVSS_MAX
 
 
 def _create():
@@ -123,7 +123,7 @@ class TestDatabaseConstraints:
             rows = db.get_vulnerabilities_with_cvss()
 
         with allure.step("Assert each cvss_score is between 0.0 and 10.0"):
-            violations = [r for r in rows if not (0.0 <= r["cvss_score"] <= 10.0)]
+            violations = [r for r in rows if not (CVSS_MIN <= r["cvss_score"] <= CVSS_MAX)]
             assert not violations, (
                 f"cvss_score out of range in {len(violations)} row(s): "
                 + ", ".join(f"{r['cve_id']}={r['cvss_score']}" for r in violations)
