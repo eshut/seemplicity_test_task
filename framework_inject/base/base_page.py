@@ -1,5 +1,5 @@
 """Framework: https://github.com/eshut/Inject-Framework"""
-
+from __future__ import annotations
 
 import datetime
 import os
@@ -21,6 +21,7 @@ class BasePage(ABC, Logger):
         self.page = RunBrowser().page
 
     def goto(self, url):
+        self.logger.info(f"Navigating to: {url}")
         self.page.goto(url)
 
     def set_auth_token(self, token: str) -> None:
@@ -92,9 +93,7 @@ class BasePage(ABC, Logger):
 
     def wait_for_element(self, selector: str, time: int | float = DEFAULT_WAIT_TIME_MS, frame: Optional[Frame] = None,
                          state=None):
-        """
-        Wait for an element to appear on the page or in a specific frame.
-        """
+        self.logger.debug(f"Waiting for element: {selector}")
         target = frame or self.page
         target.wait_for_selector(selector, timeout=time, state=state)
 
@@ -151,9 +150,7 @@ class BasePage(ABC, Logger):
         return target
 
     def click(self, selector: str, frame: Optional[Frame] = None):
-        """
-        Click an element on the page or in a specific frame.
-        """
+        self.logger.info(f"Clicking: {selector}")
         target = frame or self.page
         self.wait_for_element(selector, frame=frame)
         target.click(selector)
@@ -201,7 +198,7 @@ class BasePage(ABC, Logger):
             return False
 
     def scroll_and_click(self, selector: str, frame: Optional[Frame] = None):
-        """Scrolls to an element and clicks it."""
+        self.logger.debug(f"Scroll and click: {selector}")
         self.scroll_page(selector, frame)
         self.move_and_click(selector, frame)
 
@@ -219,9 +216,7 @@ class BasePage(ABC, Logger):
         self.click(selector, frame)
 
     def fill_text(self, selector: str, text: str, frame: Optional[Frame] = None):
-        """
-        Fill a text field on the page or in a specific frame.
-        """
+        self.logger.info(f"Filling '{selector}' with: {text}")
         target = frame or self.page
         self.wait_for_element(selector, frame=frame)
         target.fill(selector, text)

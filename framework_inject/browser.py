@@ -39,7 +39,6 @@ class DriverWebSocket:
 
 class ChromeBrowser:
     def __init__(self):
-        self.driver_ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = None
         self.browser = None
         self.page = None
@@ -54,8 +53,9 @@ class ChromeBrowser:
         return self.browser, self.page
 
     def run_remote_browser(self):
+        ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.connect_over_cdp(self.driver_ws_url)
+        self.browser = self.playwright.chromium.connect_over_cdp(ws_url)
         context = self.browser.contexts[0]
         self.page = context.new_page()
         return self.browser, self.page
@@ -71,7 +71,6 @@ class ChromeBrowser:
 
 class FireFoxBrowser:
     def __init__(self):
-        self.driver_ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = None
         self.browser = None
         self.page = None
@@ -86,8 +85,9 @@ class FireFoxBrowser:
         return self.browser, self.page
 
     def run_remote_browser(self):
+        ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.connect_over_cdp(self.driver_ws_url)
+        self.browser = self.playwright.chromium.connect_over_cdp(ws_url)
         context = self.browser.contexts[0]
         self.page = context.new_page()
         return self.browser, self.page
@@ -122,10 +122,10 @@ class BrowserFactory(metaclass=Singleton):
     def get_browser(browsertype):
         try:
             if browsertype == BROWSERS.index(FIREFOX_BROWSER):
-                browser, page = FireFoxBrowser().run_browser(localization)
+                browser, page = FireFoxBrowser().run_browser(os.getenv("LOCALIZATION", "en"))
                 return browser, page
             elif browsertype == BROWSERS.index(CHROME_BROWSER):
-                browser, page = ChromeBrowser().run_browser(localization)
+                browser, page = ChromeBrowser().run_browser(os.getenv("LOCALIZATION", "en"))
                 return browser, page
             elif browsertype == BROWSERS.index(REMOTE_FIREFOX_BROWSER):
                 browser, page = FireFoxBrowser().run_remote_browser()
@@ -140,8 +140,9 @@ class BrowserFactory(metaclass=Singleton):
 
 class RunBrowser(metaclass=Singleton):
     def __init__(self):
-        if browser in BROWSERS:
-            browser_index = BROWSERS.index(browser)
+        browser_type = os.getenv("BROWSER")
+        if browser_type in BROWSERS:
+            browser_index = BROWSERS.index(browser_type)
             self.browser, self.page = BrowserFactory.get_browser(browser_index)
         else:
             raise Exception("No Such Browser")

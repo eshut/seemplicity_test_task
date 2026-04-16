@@ -1,0 +1,1 @@
+from framework_inject.pages.qa_dashboard.pages.dashboard_page import DashboardPage

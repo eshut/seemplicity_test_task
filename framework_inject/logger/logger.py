@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from framework_inject.constants import LOG_TIME_STRUCTURE
 
 load_dotenv()
-log_level = os.getenv("LOG_LEVEL")
+log_level = os.getenv("LOG_LEVEL", "INFO")
 
 class SingletonLogger:
     _instance = None
