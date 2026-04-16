@@ -2,3 +2,5 @@
 /venv/
 /CasAutomation.iml
 /logs/
+/.pytest_cache/
+/allure-results/

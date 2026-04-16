@@ -1,6 +1,7 @@
 """Framework: https://github.com/eshut/Inject-Framework"""
 
 import http
+import logging
 import os
 
 import requests
@@ -12,11 +13,10 @@ from framework_inject.constants import DEFAULT_VIEWPORT_SIZE, PLAYWRIGHT_PAGE_DE
     CHROME_BROWSER, FIREFOX_BROWSER, REMOTE_CHROME_BROWSER, REMOTE_FIREFOX_BROWSER, PLAYWRIGHT_DEFAULT_LOCALE
 
 load_dotenv()
-log_level = os.getenv("LOG_LEVEL")
-localization = os.getenv("LOCALIZATION")
-browser = os.getenv("BROWSER")
 save_dir = os.getenv("SAVE_DIR")
 firefox_location = os.getenv("FIREFOX_LOCATION")
+
+_logger = logging.getLogger("UnifiedLogger")
 
 
 class DriverWebSocket:
@@ -32,9 +32,9 @@ class DriverWebSocket:
             if web_socket_debugger_url:
                 return web_socket_debugger_url
             else:
-                print("WebSocketDebuggerUrl not found.")  # todo: remove prints
+                _logger.error("WebSocketDebuggerUrl not found.")
         else:
-            print(f"Failed to fetch debugger version. Status code: {response.status_code}")
+            _logger.error(f"Failed to fetch debugger version. Status code: {response.status_code}")
 
 
 class ChromeBrowser:
@@ -44,6 +44,7 @@ class ChromeBrowser:
         self.page = None
 
     def run_browser(self, locale=PLAYWRIGHT_DEFAULT_LOCALE):
+        _logger.info(f"Launching Chrome browser (locale={locale})")
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.chromium.launch(headless=False)
         context = self.browser.new_context(locale=locale)
@@ -53,6 +54,7 @@ class ChromeBrowser:
         return self.browser, self.page
 
     def run_remote_browser(self):
+        _logger.info("Connecting to remote Chrome browser via CDP")
         ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.chromium.connect_over_cdp(ws_url)
@@ -61,6 +63,7 @@ class ChromeBrowser:
         return self.browser, self.page
 
     def close_browser(self):
+        _logger.info("Closing Chrome browser")
         if self.page:
             self.page.close()
         if self.browser:
@@ -76,6 +79,7 @@ class FireFoxBrowser:
         self.page = None
 
     def run_browser(self, locale=PLAYWRIGHT_DEFAULT_LOCALE):
+        _logger.info(f"Launching Firefox browser (locale={locale})")
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.firefox.launch(headless=False)
         context = self.browser.new_context(locale=locale)
@@ -85,6 +89,7 @@ class FireFoxBrowser:
         return self.browser, self.page
 
     def run_remote_browser(self):
+        _logger.info("Connecting to remote browser via CDP")
         ws_url = DriverWebSocket().get_websocket_debugger_url()
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.chromium.connect_over_cdp(ws_url)
@@ -93,6 +98,7 @@ class FireFoxBrowser:
         return self.browser, self.page
 
     def close_browser(self):
+        _logger.info("Closing Firefox browser")
         if self.page:
             self.page.close()
         if self.browser:
@@ -135,7 +141,7 @@ class BrowserFactory(metaclass=Singleton):
                 return browser, page
             raise AssertionError("Browser not found")
         except AssertionError as _e:
-            print(_e)  # todo: change to logger
+            _logger.error(str(_e))
 
 
 class RunBrowser(metaclass=Singleton):
